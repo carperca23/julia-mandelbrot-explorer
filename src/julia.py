@@ -1,44 +1,53 @@
-import numpy as np
 import matplotlib.pyplot as plt
+from config import *
 
-def calcular_julia(h, w, c, x_min, x_max, y_min, y_max, max_iter=100):
-    y, x = np.ogrid[y_min:y_max:h*1j, x_min:x_max:w*1j]
+def calcular_julia(h, w, c, x_min, x_max, y_min, y_max, max_iter, xp):
+    y, x = xp.ogrid[y_min:y_max:h*1j, x_min:x_max:w*1j]
     
     z = x + y*1j
-    div_time = np.full(z.shape, max_iter, dtype=int)
+    div_time = xp.full(z.shape, max_iter, dtype=int)
     
     for i in range(max_iter):
-        mask = np.abs(z) <= 2
+        mask = xp.abs(z) <= 2
         z[mask] = z[mask]**2 + c
-        escaped_now = (np.abs(z) > 2) & (div_time == max_iter)
+        escaped_now = (xp.abs(z) > 2) & (div_time == max_iter)
         div_time[escaped_now] = i
 
     return div_time
 
 
-x_min = -1.5
-x_max = 1.5
-y_min = -1.5
-y_max = 1.5
-c = complex(-0.2, 0.75)
-
-alto, ancho = 1000, 1000  
-iteraciones = 50 
-
-print("Calculando...")
-
-mandelbrot_set = calcular_julia(alto, ancho, c, x_min, x_max, y_min, y_max, iteraciones)
-
-plt.figure(figsize=(10, 10))
-
-plt.imshow(mandelbrot_set, cmap='magma', 
-           extent=[x_min, x_max, y_min, y_max], 
-           origin='lower') 
-
-plt.title(f"Julia (Iteraciones: {iteraciones})")
-plt.xlabel("Parte Real")
-plt.ylabel("Parte Imaginaria")
-plt.colorbar(label="Iteraciones hasta escapar")
-
-plt.savefig("out/julia/Julia.png", dpi=300)
-plt.show()
+def run(xp, gpu_available):
+    c = complex(JULIA_C_REAL, JULIA_C_IMAG)
+    
+    print(f"Calculando Julia con {'GPU (CuPy)' if gpu_available else 'CPU (NumPy)'}...")
+    
+    julia_set = calcular_julia(
+        JULIA_ALTO, JULIA_ANCHO, c, 
+        JULIA_X_MIN, JULIA_X_MAX, 
+        JULIA_Y_MIN, JULIA_Y_MAX, 
+        JULIA_ITERACIONES, xp
+    )
+    
+    if gpu_available:
+        julia_set = julia_set.get()
+    
+    if JULIA_PHOTO_MODE:
+        plt.imsave(
+            "out/julia/Julia.png",
+            julia_set,
+            cmap=COLORMAP,
+            origin="lower"
+        )
+    else:
+        plt.figure(figsize=(10, 10))
+        plt.imshow(julia_set, cmap=COLORMAP, 
+                   extent=[JULIA_X_MIN, JULIA_X_MAX, JULIA_Y_MIN, JULIA_Y_MAX], 
+                   origin='lower') 
+        plt.title(f"Julia (Iteraciones: {JULIA_ITERACIONES})")
+        plt.xlabel("Parte Real")
+        plt.ylabel("Parte Imaginaria")
+        plt.colorbar(label="Iteraciones hasta escapar")
+        plt.savefig("out/julia/Julia.png", dpi=DPI)
+        plt.show()
+    
+    print("Julia generado correctamente en out/julia/Julia.png")

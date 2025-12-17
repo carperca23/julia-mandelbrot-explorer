@@ -1,105 +1,116 @@
-# Generador de Fractales de Mandelbrot y Julia
+# Generador de Fractales
 
-Visualización de conjuntos fractales utilizando Python, NumPy y Matplotlib.
+Generador de fractales de Mandelbrot y Julia con soporte para GPU mediante CuPy.
 
-## Descripción
+## Ejemplos
 
-Este proyecto genera imágenes de alta resolución de dos de los fractales más famosos:
+### Mandelbrot (Modo Fotográfico)
+![Mandelbrot](ejemplos/mandelbrot.png)
 
-- **Conjunto de Mandelbrot**: Fractal definido por la iteración `z = z² + c`, donde `z` comienza en 0
-- **Conjunto de Julia**: Fractal definido por la misma fórmula, pero con `c` constante y `z` variando según la posición
+### Julia (Modo Normal)
+![Julia](ejemplos/julia.png)
 
 ## Requisitos
 
 ```bash
 pip install numpy matplotlib
+# Opcional para GPU:
+pip install cupy-cuda11x  # o cupy-cuda12x según tu versión de CUDA
+```
+
+## Estructura de archivos
+
+```
+.
+├── main.py           # Punto de entrada principal
+├── config.py         # Configuración de parámetros
+├── mandelbrot.py     # Generador de Mandelbrot
+├── julia.py          # Generador de Julia
+├── ejemplos/         # Imágenes de ejemplo
+│   ├── mandelbrot.png
+│   └── julia.png
+└── out/
+    ├── mandelbrot/   # Imágenes de Mandelbrot generadas
+    └── julia/        # Imágenes de Julia generadas
 ```
 
 ## Uso
 
-### Generar el Conjunto de Mandelbrot
+Ejecuta el programa principal:
 
 ```bash
-python mandelbrot.py
+python main.py
 ```
 
-Este script genera una imagen con zoom extremo del conjunto de Mandelbrot en la región:
-- Parte real: -0.74575 a -0.74570
-- Parte imaginaria: 0.10510 a 0.10515
-- Resolución: 1500x1500 píxeles
-- Iteraciones: 350
+Se mostrará un menú con las opciones:
+- **1**: Generar fractal de Mandelbrot
+- **2**: Generar fractal de Julia
+- **0**: Salir
 
-### Generar el Conjunto de Julia
+## Configuración
 
-```bash
-python julia.py
-```
+Edita `config.py` para personalizar los fractales:
 
-Genera el conjunto de Julia con parámetro `c = -0.2 + 0.75i`:
-- Región: -1.5 a 1.5 (ambos ejes)
-- Resolución: 1000x1000 píxeles
-- Iteraciones: 50
+### Mandelbrot
+- `MANDELBROT_X_MIN`, `MANDELBROT_X_MAX`: Rango horizontal
+- `MANDELBROT_Y_MIN`, `MANDELBROT_Y_MAX`: Rango vertical
+- `MANDELBROT_ALTO`, `MANDELBROT_ANCHO`: Resolución de la imagen
+- `MANDELBROT_ITERACIONES`: Número de iteraciones (más = más detalle)
+- `MANDELBROT_PHOTO_MODE`: `True` para solo guardar imagen, `False` para mostrar con ejes
 
-## Estructura de Salida
+### Julia
+- `JULIA_X_MIN`, `JULIA_X_MAX`: Rango horizontal
+- `JULIA_Y_MIN`, `JULIA_Y_MAX`: Rango vertical
+- `JULIA_C_REAL`, `JULIA_C_IMAG`: Constante compleja del fractal
+- `JULIA_ALTO`, `JULIA_ANCHO`: Resolución de la imagen
+- `JULIA_ITERACIONES`: Número de iteraciones
+- `JULIA_PHOTO_MODE`: `True` para solo guardar imagen, `False` para mostrar con ejes
+
+### General
+- `COLORMAP`: Paleta de colores (ej: 'magma', 'viridis', 'hot', 'cool')
+- `DPI`: Resolución de guardado (300 por defecto)
+
+## Aceleración GPU
+
+El programa detecta automáticamente si CuPy está instalado y usa la GPU para cálculos más rápidos. Si no está disponible, usa NumPy con CPU.
+
+## Salidas
 
 Las imágenes se guardan en:
-```
-out/
-├── mandelbrot/
-│   └── mandelbrot_zoom.png
-└── julia/
-    └── Julia.png
-```
+- `out/mandelbrot/mandelbrot_zoom.png`
+- `out/julia/Julia.png`
 
-## Personalización
+Asegúrate de crear las carpetas `out/mandelbrot/` y `out/julia/` antes de ejecutar.
 
-### Cambiar la región de visualización
+## Coordenadas Interesantes de Mandelbrot
 
-Modifica las variables en cada script:
+Aquí tienes algunas regiones fascinantes para explorar en el fractal de Mandelbrot. Copia estas coordenadas en `config.py`:
 
 ```python
-x_min = -2.0  # Límite izquierdo
-x_max = 0.8   # Límite derecho
-y_min = -1.4  # Límite inferior
-y_max = 1.4   # Límite superior
+# Vista completa
+MANDELBROT_X_MIN, MANDELBROT_X_MAX = -2.0, 1.0
+MANDELBROT_Y_MIN, MANDELBROT_Y_MAX = -1.5, 1.5
+
+# Bahía de los Elefantes
+MANDELBROT_X_MIN, MANDELBROT_X_MAX = -0.7445, -0.7425
+MANDELBROT_Y_MIN, MANDELBROT_Y_MAX = 0.1305, 0.1325
+
+# Valle de los Caballitos de Mar
+MANDELBROT_X_MIN, MANDELBROT_X_MAX = -0.747, -0.743
+MANDELBROT_Y_MIN, MANDELBROT_Y_MAX = 0.110, 0.114
+
+# Mini-Mandelbrot
+MANDELBROT_X_MIN, MANDELBROT_X_MAX = -1.253, -1.249
+MANDELBROT_Y_MIN, MANDELBROT_Y_MAX = 0.017, 0.021
+
+# Espiral infinita
+MANDELBROT_X_MIN, MANDELBROT_X_MAX = -0.7618, -0.7612
+MANDELBROT_Y_MIN, MANDELBROT_Y_MAX = -0.0852, -0.0846
+
+# Plumas fractales
+MANDELBROT_X_MIN, MANDELBROT_X_MAX = -0.7275, -0.7265
+MANDELBROT_Y_MIN, MANDELBROT_Y_MAX = 0.1875, 0.1885
 ```
 
-### Ajustar la calidad
 
-```python
-alto, ancho = 1500, 1500  # Resolución en píxeles
-iteraciones = 350          # Más iteraciones = más detalle
-```
-
-### Cambiar el parámetro de Julia
-
-```python
-c = complex(-0.2, 0.75)  # Prueba diferentes valores
-```
-
-### Modificar el esquema de colores
-
-```python
-plt.imshow(mandelbrot_set, cmap='magma')  
-# Otras opciones: 'viridis', 'plasma', 'inferno', 'hot', 'cool'
-```
-
-## Cómo funcionan
-
-Ambos fractales se basan en determinar si un punto en el plano complejo "escapa" al infinito bajo iteración:
-
-1. Para cada píxel, se crea un número complejo correspondiente a esa coordenada
-2. Se aplica repetidamente la fórmula `z = z² + c`
-3. Se cuenta cuántas iteraciones tarda en escapar (|z| > 2)
-4. El color representa el número de iteraciones
-
-**Diferencia clave**:
-- **Mandelbrot**: `c` varía (es la posición), `z` empieza en 0
-- **Julia**: `c` es constante, `z` varía (es la posición)
-
-## Ejemplos de resultados
-
-El proyecto genera visualizaciones de alta calidad con:
-- Paleta de colores "magma" para resaltar detalles
-- Alta resolución (300 DPI)
-- Etiquetas de ejes y barra de colores informativa
+**Consejo**: A mayor zoom (rango más pequeño), necesitarás más iteraciones para ver los detalles. Empieza con 300-500 iteraciones y ajusta según el resultado.
